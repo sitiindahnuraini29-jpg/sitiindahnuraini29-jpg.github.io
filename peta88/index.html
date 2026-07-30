@@ -1,1 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peta Jejak Kapal Arwana 88 — Kasus Fiktif</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+  :root{
+    --cream: #F3ECDD;
+    --paper: #FBF6EC;
+    --ink: #2E2419;
+    --ink-soft: #7A6A56;
+    --rust: #C1602E;
+    --terracotta: #E0975A;
+    --brown: #7C5230;
+    --brown-deep: #5C3B22;
+    --line: #C9AD84;
+    --card-shadow: rgba(46,36,25,0.16);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font-family:'Work Sans', system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+  }
 
+  .app{
+    display:flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  header{
+    padding: 18px 24px 14px;
+    background: var(--cream);
+    border-bottom: 1px dashed var(--line);
+    flex-shrink:0;
+  }
+  .eyebrow{
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-weight: 600;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 6px;
+  }
+  .eyebrow::before{
+    content:""; width:7px; height:7px; border-radius:50%;
+    background: var(--rust); box-shadow: 0 0 0 3px rgba(193,96,46,0.2);
+  }
+  h1{
+    font-family:'Lora', serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0 0 4px;
+    color: var(--brown-deep);
+  }
+  .sub{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    max-width: 640px;
+    line-height: 1.5;
+  }
+  .disclaimer{
+    display:inline-block;
+    margin-top: 8px;
+    font-size: 10.5px;
+    color: var(--brown-deep);
+    background: rgba(224,151,90,0.18);
+    border: 1px dashed var(--line);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  .body-row{
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* Event strip — now a horizontal-scroll strip on top, map fills the rest below */
+  .sidebar{
+    width: 100%;
+    flex-shrink:0;
+    background: var(--paper);
+    border-bottom: 1px solid rgba(124,82,48,0.15);
+    padding: 12px 0 10px;
+  }
+
+  .sidebar-title{
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding: 0 16px 8px;
+    font-weight: 600;
+  }
+
+  #eventList{
+    display:flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 16px 8px;
+    scroll-snap-type: x proximity;
+  }
+  #eventList::-webkit-scrollbar{ height: 6px; }
+  #eventList::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 8px; }
+
+  .event-item{
+    display:flex;
+    gap: 9px;
+    align-items:flex-start;
+    padding: 9px 11px;
+    cursor: pointer;
+    border-radius: 10px;
+    border-bottom: 3px solid transparent;
+    background: rgba(124,82,48,0.06);
+    flex: 0 0 auto;
+    width: 168px;
+    scroll-snap-align: start;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .event-item:hover{ background: rgba(224,151,90,0.16); }
+  .event-item.active{
+    background: rgba(224,151,90,0.24);
+    border-bottom-color: var(--rust);
+  }
+  .event-num{
+    font-family:'Lora', serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--paper);
+    background: var(--rust);
+    width: 21px; height:21px;
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    margin-top: 1px;
+  }
+  .event-text{ min-width:0; }
+  .event-text .event-date{
+    font-family:'Lora', serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--rust);
+    display:block;
+    margin-bottom: 2px;
+    white-space: nowrap;
+  }
+  .event-text .event-title{
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Map */
+  #map{ flex:1; min-width: 0; min-height: 320px; }
+
+  .maplibregl-popup-content{
+    font-family:'Work Sans', sans-serif;
+    background: var(--paper);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 10px 30px var(--card-shadow);
+    max-width: 280px;
+  }
+  .maplibregl-popup-tip{ border-top-color: var(--paper) !important; border-bottom-color: var(--paper) !important; }
+  .popup-date{
+    font-family:'Lora', serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rust);
+    display:block;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+  .popup-title{
+    font-family:'Lora', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--brown-deep);
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+  .popup-body ul{
+    margin:0; padding-left: 15px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .popup-body li{ margin-bottom: 4px; }
+
+  .marker{
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--rust);
+    border: 2.5px solid var(--paper);
+    box-shadow: 0 2px 8px rgba(46,36,25,0.35);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--paper);
+    font-family:'Lora', serif;
+    font-weight: 700;
+    font-size: 11px;
+    cursor: pointer;
+    transition: transform .15s ease;
+  }
+  .marker:hover{ transform: scale(1.15); }
+  .marker.active{ background: var(--brown-deep); transform: scale(1.2); }
+
+  .maplibregl-ctrl-attrib{ font-size: 10px; }
+
+  @media (max-width: 760px){
+    header{ padding: 14px 16px 12px; }
+    h1{ font-size: 17px; }
+    .sub{ font-size: 12px; }
+    .event-item{ width: 148px; padding: 8px 10px; }
+    .event-text .event-title{ font-size: 11.5px; }
+    #map{ min-height: 280px; }
+  }
+
+  @media (max-width: 480px){
+    .sidebar-title{ padding: 0 12px 6px; }
+    #eventList{ padding: 2px 12px 8px; gap: 8px; }
+    .event-item{ width: 132px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="eyebrow">Peta Jejak &middot; Kepulauan Aru, Indonesia</div>
+    <h1>Peta Kronologi — Operasi Senyap Kapal Arwana 88</h1>
+    <p class="sub">Titik-titik pada peta menandai lokasi fiktif setiap peristiwa dalam kasus, disusun mengikuti urutan waktu di sekitar perairan Kepulauan Aru. Geser daftar peristiwa di bawah atau klik penanda pada peta untuk melihat detail kejadian.</p>
+    <span class="disclaimer">Seluruh koordinat bersifat fiktif untuk keperluan simulasi — bukan lokasi kejadian nyata.</span>
+  </header>
+
+  <div class="body-row">
+    <aside class="sidebar">
+      <div class="sidebar-title">Urutan Peristiwa</div>
+      <div id="eventList"></div>
+    </aside>
+    <div id="map"></div>
+  </div>
+</div>
+
+<script>
+const EVENTS = [
+  { date:"18 Des 2026", title:"Izin Operasi Berakhir", coord:[134.212, -6.239],
+    bullets:["Izin KM Arwana 88 berakhir; kapal seharusnya kembali ke pelabuhan untuk pemeriksaan.","Data pelabuhan menunjukkan kapal tidak pernah melakukan pemeriksaan ulang.","Dokumen izin baru yang dikirim ternyata tidak terdaftar di basis data pemerintah."] },
+  { date:"3 Jan 2027 · 02.15 WIT", title:"Kapal Meninggalkan Pelabuhan", coord:[134.35, -6.05],
+    bullets:["Berangkat dari pelabuhan kecil di Kab. Kepulauan Aru membawa 27 awak kapal.","Tercatat membawa alat tangkap cumi dan bekal bahan bakar 25 hari.","Pekerja pelabuhan melihat jaring pukat besar disembunyikan di bawah terpal."] },
+  { date:"5 Jan 2027", title:"Sistem VMS Dimatikan", coord:[134.95, -6.55],
+    bullets:["Sinyal pelacakan kapal menghilang dua hari setelah berangkat.","Perusahaan menyebut kerusakan antena; teknisi mengaku alat dimatikan atas perintah nakhoda.","Posisi terakhir tercatat sekitar 45 mil laut dari Kepulauan Aru."] },
+  { date:"7–12 Jan 2027", title:"Penangkapan di Zona Terlarang", coord:[135.45, -6.95],
+    bullets:["Kapal memasuki zona perlindungan ikan muda selama sinyal padam.","Pukat diturunkan tiap malam, menjaring berbagai satwa laut.","Diperkirakan lebih dari 110 ton ikan tertangkap dalam enam hari."] },
+  { date:"10 Jan 2027", title:"Dugaan Kekerasan Terhadap Awak", coord:[135.60, -7.05],
+    bullets:["Awak kapal memprotes jam kerja yang mencapai 18 jam sehari.","Permintaan pemulangan seorang awak yang terluka ditolak.","Telepon genggam awak dikumpulkan untuk memutus komunikasi dengan keluarga."] },
+  { date:"13 Jan 2027", title:"Transshipment di Tengah Laut", coord:[136.05, -7.35],
+    bullets:["Bertemu kapal asing MV Northern Star di luar jalur pelayaran umum.","Sekitar 80 ton hasil tangkapan dipindahkan tanpa izin resmi.","Nilai transaksi diperkirakan sekitar Rp14,8 miliar."] },
+  { date:"14 Jan 2027", title:"VMS Aktif, Laporan Dimanipulasi", coord:[136.85, -6.15],
+    bullets:["Sinyal VMS kembali aktif pada posisi ~120 mil laut dari titik hilang sinyal.","Laporan resmi hanya mencatat 24 ton cumi.","Angka jauh lebih kecil dari kapasitas kapal dan rekaman aktivitas awak."] },
+  { date:"18 Jan 2027", title:"Bukti Bocor ke Jurnalis", coord:[134.60, -6.30],
+    bullets:["Seorang awak kapal mengirim video kepada kakaknya saat kapal mendekati sinyal seluler.","Materi diteruskan ke media fiktif Suara Bahari.","Berisi rekaman pukat terlarang, kondisi awak, dan koordinat pertemuan kapal."] },
+  { date:"20 Jan 2027", title:"Hubungan dengan Politisi Terungkap", coord:[134.25, -6.20],
+    bullets:["Saham terbesar pemilik kapal dipegang perusahaan yang direkturnya kerabat seorang politisi nasional.","Kantor perusahaan berada di gedung yang sama dengan tim pemenangan pemilu sang politisi.","Nama politisi tersebut tidak tercantum dalam dokumen resmi kepemilikan kapal."] },
+  { date:"22 Jan 2027", title:"Operasi Penangkapan Kapal", coord:[133.35, -6.10],
+    bullets:["Kapal patroli menemukan dan mengejar KM Arwana 88 selama hampir dua jam.","Ditemukan ±31 ton ikan tak tercatat, pukat terlarang, dan VMS yang dimodifikasi.","Enam awak kapal ditemukan dalam kondisi terluka dan kekurangan makanan."] },
+  { date:"28 Jan 2027", title:"Investigasi Media Terbit", coord:[134.30, -6.28],
+    bullets:["Media fiktif Suara Bahari menerbitkan laporan investigasi mendalam.","Dibaca lebih dari satu juta kali dalam 24 jam; ramai diperbincangkan di media sosial.","Organisasi nelayan menuntut keterbukaan pemilik manfaat perusahaan."] },
+  { date:"April 2027", title:"Lima Tersangka Ditetapkan", coord:[134.22, -6.24],
+    bullets:["Nakhoda, manajer operasional, direktur perusahaan, mandor kapal, dan seorang pejabat pelabuhan ditetapkan sebagai tersangka.","Politisi yang disebut dalam penyelidikan masih berstatus saksi.","Kelompok masyarakat sipil menilai penyelidikan belum menyentuh pihak yang paling diuntungkan."] }
+];
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      'osm': {
+        type: 'raster',
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        attribution: '&copy; OpenStreetMap contributors'
+      }
+    },
+    layers: [
+      { id: 'osm-layer', type: 'raster', source: 'osm', minzoom: 0, maxzoom: 19 }
+    ]
+  },
+  center: [134.9, -6.6],
+  zoom: 7.2,
+  attributionControl: true
+});
+
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+let markers = [];
+let popups = [];
+let activeIdx = null;
+
+function setActive(idx){
+  activeIdx = idx;
+  markers.forEach((m, i) => {
+    m.getElement().classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.event-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+}
+
+function openPopup(idx){
+  popups.forEach(p => p.remove());
+  const ev = EVENTS[idx];
+  const popup = new maplibregl.Popup({ offset: 18, closeButton: true, maxWidth: '300px' })
+    .setLngLat(ev.coord)
+    .setHTML(`
+      <span class="popup-date">${ev.date}</span>
+      <h3 class="popup-title">${ev.title}</h3>
+      <div class="popup-body"><ul>${ev.bullets.map(b => `<li>${b}</li>`).join("")}</ul></div>
+    `)
+    .addTo(map);
+  popups = [popup];
+  setActive(idx);
+}
+
+map.on('load', () => {
+  // dashed route line connecting events in chronological order
+  map.addSource('route', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: EVENTS.map(e => e.coord)
+      }
+    }
+  });
+  map.addLayer({
+    id: 'route-line',
+    type: 'line',
+    source: 'route',
+    paint: {
+      'line-color': '#7C5230',
+      'line-width': 2,
+      'line-dasharray': [2, 2],
+      'line-opacity': 0.65
+    }
+  });
+
+  EVENTS.forEach((ev, idx) => {
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.textContent = idx + 1;
+    el.addEventListener('click', () => openPopup(idx));
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat(ev.coord)
+      .addTo(map);
+    markers.push(marker);
+  });
+
+  // fit bounds to all points
+  const bounds = new maplibregl.LngLatBounds();
+  EVENTS.forEach(ev => bounds.extend(ev.coord));
+  map.fitBounds(bounds, { padding: 70, maxZoom: 9 });
+});
+
+const listEl = document.getElementById('eventList');
+EVENTS.forEach((ev, idx) => {
+  const item = document.createElement('div');
+  item.className = 'event-item';
+  item.innerHTML = `
+    <span class="event-num">${idx + 1}</span>
+    <span class="event-text">
+      <span class="event-date">${ev.date}</span>
+      <span class="event-title">${ev.title}</span>
+    </span>
+  `;
+  item.addEventListener('click', () => {
+    map.flyTo({ center: ev.coord, zoom: 9, duration: 900 });
+    setTimeout(() => openPopup(idx), 300);
+  });
+  listEl.appendChild(item);
+});
+</script>
+</body>
+</html>
