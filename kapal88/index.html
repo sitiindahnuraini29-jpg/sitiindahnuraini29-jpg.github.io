@@ -1,1 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operasi Senyap Kapal Arwana 88 — Kronologi Kasus (Fiktif)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F3ECDD;
+    --paper: #FBF6EC;
+    --ink: #2E2419;
+    --ink-soft: #7A6A56;
+    --rust: #C1602E;
+    --terracotta: #E0975A;
+    --brown: #7C5230;
+    --brown-deep: #5C3B22;
+    --line: #C9AD84;
+    --card-shadow: rgba(46,36,25,0.10);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background: var(--cream);
+    background-image: radial-gradient(circle at 1px 1px, rgba(124,82,48,0.08) 1px, transparent 0);
+    background-size: 24px 24px;
+    color: var(--ink);
+    font-family: 'Work Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 48px 28px 60px; }
 
+  header{ margin-bottom: 34px; }
+  .eyebrow{
+    font-family:'Work Sans', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-weight: 600;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 10px;
+  }
+  .eyebrow::before{
+    content:""; width:8px; height:8px; border-radius:50%;
+    background: var(--rust); box-shadow: 0 0 0 3px rgba(193,96,46,0.2);
+  }
+  h1{
+    font-family:'Lora', serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.12;
+    margin: 0 0 12px;
+    color: var(--brown-deep);
+  }
+  h1 em{ font-style: italic; color: var(--rust); font-weight: 600; }
+  .sub{
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 700px;
+    line-height: 1.6;
+  }
+  .disclaimer{
+    display:inline-block;
+    margin-top: 14px;
+    font-size: 11.5px;
+    color: var(--brown-deep);
+    background: rgba(224,151,90,0.18);
+    border: 1px dashed var(--line);
+    padding: 6px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+
+  /* scroll hint */
+  .scroll-hint{
+    display:flex; align-items:center; gap:8px;
+    font-size: 12px; color: var(--ink-soft);
+    margin: 6px 0 18px;
+    font-style: italic;
+  }
+  .scroll-hint svg{ animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{ transform:translateX(0);} 50%{ transform:translateX(6px);} }
+
+  /* Timeline */
+  .timeline-scroll{
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 4px 26px;
+    scroll-snap-type: x proximity;
+  }
+  .timeline-scroll::-webkit-scrollbar{ height: 8px; }
+  .timeline-scroll::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 8px; }
+  .timeline-scroll::-webkit-scrollbar-track{ background: transparent; }
+
+  .timeline{
+    position: relative;
+    display: flex;
+    gap: 0;
+    min-width: max-content;
+    padding-top: 10px;
+  }
+
+  .node{
+    scroll-snap-align: start;
+    width: 250px;
+    flex-shrink: 0;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 14px;
+    position: relative;
+  }
+
+  .icon-shape{
+    width: 74px; height: 74px;
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    position: relative;
+    flex-shrink:0;
+    margin-bottom: 14px;
+    z-index: 2;
+  }
+  .icon-shape svg{ width: 32px; height: 32px; }
+  .node:nth-child(odd) .icon-shape{
+    background: var(--rust);
+    color: var(--paper);
+  }
+  .node:nth-child(even) .icon-shape{
+    background: var(--paper);
+    border: 2.5px solid var(--brown);
+    color: var(--brown);
+    border-radius: 12px;
+    transform: rotate(45deg);
+  }
+  .node:nth-child(even) .icon-shape svg{ transform: rotate(-45deg); }
+
+  .connector{
+    position: absolute;
+    top: 47px;
+    left: -50%;
+    width: 100%;
+    height: 0;
+    border-top: 2.5px dotted var(--line);
+    z-index: 1;
+  }
+  .node:first-child .connector{ display:none; }
+
+  .pill{
+    font-family:'Lora', serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--brown-deep);
+    background: var(--paper);
+    border: 1.5px dashed var(--rust);
+    border-radius: 999px;
+    padding: 6px 16px;
+    white-space: nowrap;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 6px var(--card-shadow);
+  }
+
+  .card{
+    background: var(--paper);
+    border-radius: 12px;
+    padding: 14px 16px 16px;
+    width: 100%;
+    box-shadow: 0 4px 14px var(--card-shadow);
+    border: 1px solid rgba(124,82,48,0.12);
+  }
+  .card h3{
+    font-family:'Lora', serif;
+    font-size: 15.5px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .card ul{
+    margin:0; padding-left: 16px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .card li{ margin-bottom: 5px; }
+  .card li:last-child{ margin-bottom: 0; }
+
+  /* Legend / footer */
+  .legend-row{
+    margin-top: 30px;
+    display:flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items:center;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .legend-item{ display:flex; align-items:center; gap:8px; }
+  .legend-dot{ width: 14px; height:14px; border-radius:50%; background: var(--rust); }
+  .legend-diamond{ width: 12px; height:12px; border: 2px solid var(--brown); transform: rotate(45deg); border-radius: 3px; }
+
+  footer{
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line);
+    font-size: 11px;
+    color: var(--ink-soft);
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  @media (max-width: 640px){
+    .node{ width: 210px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kronologi &middot; Des 2026 &ndash; Apr 2027</div>
+    <h1>Operasi Senyap<br><em>Kapal Arwana 88</em></h1>
+    <p class="sub">Sembilan hari tanpa sinyal, satu kapal ikan, dan jejak yang berujung pada seorang politisi nasional. Rangkaian dua belas peristiwa berikut merangkum jalannya kasus dari berakhirnya izin operasi hingga penetapan tersangka.</p>
+    <span class="disclaimer">Kasus fiktif — dibuat untuk keperluan simulasi/edukasi, bukan peristiwa nyata.</span>
+  </header>
+
+  <div class="scroll-hint">
+    <span>Geser untuk menjelajahi kronologi</span>
+    <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 5H15M15 5L11 1M15 5L11 9" stroke="#7A6A56" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="timeline-scroll">
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-item"><span class="legend-dot"></span> Fase operasi kapal</div>
+    <div class="legend-item"><span class="legend-diamond"></span> Fase pengungkapan &amp; hukum</div>
+  </div>
+
+  <footer>
+    <span>Sumber: dokumen kasus fiktif "Operasi Senyap Kapal Arwana 88".</span>
+    <span>Peta lokasi kejadian tersedia pada file terpisah.</span>
+  </footer>
+</div>
+
+<script>
+const ICONS = {
+  permit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M4 20L20 4" stroke-width="1.8"/></svg>',
+  ship: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20l-2-6H4z"/><path d="M6 14V7h12v7"/><path d="M9 7V4h6v3"/><path d="M12 20v0"/></svg>',
+  signaloff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 3.5-3.5"/><path d="M19 13a10 10 0 0 0-2-3"/><circle cx="12" cy="20" r="1"/></svg>',
+  net: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18M6 5v14M12 5v14M18 5v14"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 1 21h22z"/><path d="M12 9v5"/><circle cx="12" cy="17.3" r="0.6" fill="currentColor"/></svg>',
+  exchange: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg>',
+  document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>',
+  leak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v13"/><path d="M12 15c-3 0-5 2-5 4.5S9.5 22 12 22s5-1 5-4.5S15 15 12 15z"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7a5 5 0 0 1 0-10h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1.7.7L15 17H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M7 9h7M7 12.5h7"/></svg>',
+  gavel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l6 6"/><path d="M9 9l-6.5 6.5a1.5 1.5 0 0 0 0 2.1l0.9.9a1.5 1.5 0 0 0 2.1 0L12 12"/><path d="M15 3l6 6M2 22h9"/></svg>'
+};
+
+const EVENTS = [
+  { date:"18 Des 2026", title:"Izin Operasi Berakhir", icon:"permit",
+    bullets:["Izin KM Arwana 88 berakhir; kapal seharusnya kembali ke pelabuhan untuk pemeriksaan.","Data pelabuhan menunjukkan kapal tidak pernah melakukan pemeriksaan ulang.","Dokumen izin baru yang dikirim ternyata tidak terdaftar di basis data pemerintah."] },
+  { date:"3 Jan 2027 · 02.15 WIT", title:"Kapal Meninggalkan Pelabuhan", icon:"ship",
+    bullets:["Berangkat dari pelabuhan kecil di Kab. Kepulauan Aru membawa 27 awak kapal.","Tercatat membawa alat tangkap cumi dan bekal bahan bakar 25 hari.","Pekerja pelabuhan melihat jaring pukat besar disembunyikan di bawah terpal."] },
+  { date:"5 Jan 2027", title:"Sistem VMS Dimatikan", icon:"signaloff",
+    bullets:["Sinyal pelacakan kapal menghilang dua hari setelah berangkat.","Perusahaan menyebut kerusakan antena; teknisi mengaku alat dimatikan atas perintah nakhoda.","Posisi terakhir tercatat sekitar 45 mil laut dari Kepulauan Aru."] },
+  { date:"7–12 Jan 2027", title:"Penangkapan di Zona Terlarang", icon:"net",
+    bullets:["Kapal memasuki zona perlindungan ikan muda selama sinyal padam.","Pukat diturunkan tiap malam, menjaring berbagai satwa laut.","Diperkirakan lebih dari 110 ton ikan tertangkap dalam enam hari."] },
+  { date:"10 Jan 2027", title:"Dugaan Kekerasan Terhadap Awak", icon:"alert",
+    bullets:["Awak kapal memprotes jam kerja yang mencapai 18 jam sehari.","Permintaan pemulangan seorang awak yang terluka ditolak.","Telepon genggam awak dikumpulkan untuk memutus komunikasi dengan keluarga."] },
+  { date:"13 Jan 2027", title:"Transshipment di Tengah Laut", icon:"exchange",
+    bullets:["Bertemu kapal asing MV Northern Star di luar jalur pelayaran umum.","Sekitar 80 ton hasil tangkapan dipindahkan tanpa izin resmi.","Nilai transaksi diperkirakan sekitar Rp14,8 miliar."] },
+  { date:"14 Jan 2027", title:"VMS Aktif, Laporan Dimanipulasi", icon:"document",
+    bullets:["Sinyal VMS kembali aktif pada posisi ~120 mil laut dari titik hilang sinyal.","Laporan resmi hanya mencatat 24 ton cumi.","Angka jauh lebih kecil dari kapasitas kapal dan rekaman aktivitas awak."] },
+  { date:"18 Jan 2027", title:"Bukti Bocor ke Jurnalis", icon:"leak",
+    bullets:["Seorang awak kapal mengirim video kepada kakaknya saat kapal mendekati sinyal seluler.","Materi diteruskan ke media fiktif Suara Bahari.","Berisi rekaman pukat terlarang, kondisi awak, dan koordinat pertemuan kapal."] },
+  { date:"20 Jan 2027", title:"Hubungan dengan Politisi Terungkap", icon:"link",
+    bullets:["Saham terbesar pemilik kapal dipegang perusahaan yang direkturnya kerabat seorang politisi nasional.","Kantor perusahaan berada di gedung yang sama dengan tim pemenangan pemilu sang politisi.","Nama politisi tersebut tidak tercantum dalam dokumen resmi kepemilikan kapal."] },
+  { date:"22 Jan 2027", title:"Operasi Penangkapan Kapal", icon:"shield",
+    bullets:["Kapal patroli menemukan dan mengejar KM Arwana 88 selama hampir dua jam.","Ditemukan ±31 ton ikan tak tercatat, pukat terlarang, dan VMS yang dimodifikasi.","Enam awak kapal ditemukan dalam kondisi terluka dan kekurangan makanan."] },
+  { date:"28 Jan 2027", title:"Investigasi Media Terbit", icon:"news",
+    bullets:["Media fiktif Suara Bahari menerbitkan laporan investigasi mendalam.","Dibaca lebih dari satu juta kali dalam 24 jam; ramai diperbincangkan di media sosial.","Organisasi nelayan menuntut keterbukaan pemilik manfaat perusahaan."] },
+  { date:"April 2027", title:"Lima Tersangka Ditetapkan", icon:"gavel",
+    bullets:["Nakhoda, manajer operasional, direktur perusahaan, mandor kapal, dan seorang pejabat pelabuhan ditetapkan sebagai tersangka.","Politisi yang disebut dalam penyelidikan masih berstatus saksi.","Kelompok masyarakat sipil menilai penyelidikan belum menyentuh pihak yang paling diuntungkan."] }
+];
+
+const timeline = document.getElementById("timeline");
+EVENTS.forEach(ev => {
+  const node = document.createElement("div");
+  node.className = "node";
+  node.innerHTML = `
+    <div class="connector"></div>
+    <div class="icon-shape">${ICONS[ev.icon]}</div>
+    <div class="pill">${ev.date}</div>
+    <div class="card">
+      <h3>${ev.title}</h3>
+      <ul>${ev.bullets.map(b => `<li>${b}</li>`).join("")}</ul>
+    </div>
+  `;
+  timeline.appendChild(node);
+});
+</script>
+</body>
+</html>
