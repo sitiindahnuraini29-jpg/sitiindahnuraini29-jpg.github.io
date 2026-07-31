@@ -1,1 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peta Timeline — Simulasi Kasus (Data Dummy) · Tegal</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1c2b; --bg-deep:#081420; --card:#12283b; --card-line:#22405a;
+    --ink:#eef3f2; --ink-dim:#93aab8; --ink-faint:#5d7688;
+    --teal:#3fa796; --teal-soft:#7fd6c4;
+    --coral:#e08a5b; --coral-soft:#f2b48c;
+    --amber:#e8b04b;
+  }
+  *{box-sizing:border-box;}
+  html,body{ margin:0; height:100%; font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink); }
 
+  .app{ display:flex; flex-direction:column; height:100%; }
+
+  /* disclaimer banner */
+  .disclaimer{
+    background:linear-gradient(90deg, rgba(232,176,75,.16), rgba(224,138,91,.10));
+    border-bottom:1px solid rgba(232,176,75,.35);
+    padding:9px 20px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px; letter-spacing:.02em;
+    color:var(--amber);
+    display:flex; align-items:center; gap:8px;
+    flex:none;
+  }
+
+  header{
+    padding:18px 22px 14px; flex:none;
+    border-bottom:1px solid var(--card-line);
+    background:var(--bg-deep);
+    display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--teal-soft); margin-bottom:8px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(63,167,150,.18); }
+  h1{
+    font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0;
+    letter-spacing:-.01em;
+  }
+  .sub{ color:var(--ink-dim); font-size:12.5px; margin-top:4px; max-width:520px; line-height:1.5; }
+  .legend{ display:flex; gap:16px; flex-wrap:wrap; }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--ink-dim); font-family:'JetBrains Mono', monospace; }
+  .legend-dot{ width:11px; height:11px; border-radius:50%; flex:none; }
+
+  main{ position:relative; flex:1; min-height:0; }
+  #map{ position:absolute; inset:0; }
+
+  .maplibregl-popup{ display:none; } /* we use custom dialog instead */
+
+  /* timeline strip */
+  .timeline-wrap{
+    flex:none; background:var(--bg-deep); border-top:1px solid var(--card-line);
+    padding:14px 22px 18px; overflow-x:auto;
+  }
+  .timeline-title{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-faint); margin-bottom:12px;
+  }
+  .timeline{
+    position:relative; display:flex; align-items:flex-start; gap:0; min-width:max-content;
+    padding-top:6px;
+  }
+  .timeline::before{
+    content:""; position:absolute; top:15px; left:0; right:0; height:1px;
+    background:var(--card-line);
+  }
+  .tl-node{
+    flex:none; width:172px; padding:0 10px; cursor:pointer; text-align:left; position:relative;
+  }
+  .tl-dot{
+    width:16px; height:16px; border-radius:50%; border:2.5px solid var(--bg-deep);
+    margin-bottom:10px; transition:transform .15s;
+  }
+  .tl-node:hover .tl-dot{ transform:scale(1.2); }
+  .tl-node.active .tl-dot{ box-shadow:0 0 0 4px rgba(63,167,150,.22); }
+  .tl-date{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--ink-faint); }
+  .tl-name{ font-size:12.5px; font-weight:500; color:var(--ink); margin-top:3px; line-height:1.3; }
+  .tl-count{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--coral-soft); margin-top:4px; }
+
+  /* marker */
+  .mk{ cursor:pointer; }
+  .mk-core{
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-weight:600; color:#04211c;
+    border:2px solid rgba(255,255,255,.55);
+    box-shadow:0 3px 10px rgba(0,0,0,.4);
+  }
+  .mk-pulse{
+    position:absolute; inset:0; border-radius:50%; opacity:.55;
+    animation:pulse 2.2s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{ transform:scale(.6); opacity:.5; }
+    100%{ transform:scale(2.1); opacity:0; }
+  }
+
+  /* modal dialog */
+  .overlay{
+    position:fixed; inset:0; background:rgba(4,10,16,.6); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center; z-index:100;
+    opacity:0; pointer-events:none; transition:opacity .18s;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .dialog{
+    width:min(420px, 92vw); background:var(--card); border:1px solid var(--card-line);
+    border-radius:14px; padding:24px; box-shadow:0 24px 60px rgba(0,0,0,.5);
+    transform:translateY(10px) scale(.98); transition:transform .18s;
+  }
+  .overlay.show .dialog{ transform:translateY(0) scale(1); }
+
+  .dlg-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--amber); background:rgba(232,176,75,.12); border:1px solid rgba(232,176,75,.3);
+    padding:3px 9px; border-radius:20px; margin-bottom:14px;
+  }
+  .dlg-close{
+    position:absolute; top:16px; right:16px; background:transparent; border:none;
+    color:var(--ink-faint); font-size:18px; cursor:pointer; line-height:1;
+    width:28px; height:28px; border-radius:8px;
+  }
+  .dlg-close:hover{ background:rgba(255,255,255,.06); color:var(--ink); }
+  .dialog{ position:relative; }
+
+  .dlg-title{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; margin:0 0 4px; line-height:1.25; }
+  .dlg-date{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--ink-faint); margin-bottom:18px; }
+
+  .dlg-row{ display:flex; justify-content:space-between; gap:14px; padding:10px 0; border-top:1px solid var(--card-line); }
+  .dlg-row:first-of-type{ border-top:none; }
+  .dlg-k{ font-size:12px; color:var(--ink-dim); flex:none; }
+  .dlg-v{ font-size:12.5px; color:var(--ink); text-align:right; font-weight:500; }
+  .dlg-v.big{ font-family:'JetBrains Mono', monospace; font-size:17px; color:var(--coral-soft); font-weight:600; }
+
+  .dlg-foot{
+    margin-top:16px; padding-top:14px; border-top:1px dashed var(--card-line);
+    font-size:11px; color:var(--ink-faint); line-height:1.5;
+  }
+
+  @media (max-width:640px){
+    header{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="disclaimer">
+    ⚠ DATA FIKTIF/DUMMY — seluruh titik lokasi, tanggal, dan narasi pada peta ini adalah simulasi untuk keperluan demonstrasi visualisasi, bukan hasil investigasi atau tuduhan terverifikasi terhadap pihak manapun.
+  </div>
+
+  <header>
+    <div>
+      <div class="eyebrow">Simulasi Peta Kasus · Data Dummy</div>
+      <h1>Timeline Titik Simulasi — Sekitar Tegal</h1>
+      <div class="sub">Koordinat dibuat fiktif di sekitar wilayah Tegal, Jawa Tengah. Klik titik pada peta atau kartu di garis waktu bawah untuk melihat detail per baris data.</div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#3fa796"></span> Aduan rendah (&lt;15)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#e8b04b"></span> Aduan sedang (15–22)</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#e0654a"></span> Aduan tinggi (&gt;22)</div>
+    </div>
+  </header>
+
+  <main>
+    <div id="map"></div>
+  </main>
+
+  <div class="timeline-wrap">
+    <div class="timeline-title">Garis Waktu Simulasi (Tanggal Fiktif)</div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <button class="dlg-close" id="dlgClose">✕</button>
+    <span class="dlg-tag">Kasus Simulasi · Data Dummy</span>
+    <h2 class="dlg-title" id="dlgTitle"></h2>
+    <div class="dlg-date" id="dlgDate"></div>
+
+    <div class="dlg-row"><div class="dlg-k">Alamat</div><div class="dlg-v" id="dlgAddr"></div></div>
+    <div class="dlg-row"><div class="dlg-k">Jumlah Aduan TPPO</div><div class="dlg-v big" id="dlgCount"></div></div>
+    <div class="dlg-row"><div class="dlg-k">Status</div><div class="dlg-v" id="dlgStatus"></div></div>
+    <div class="dlg-row"><div class="dlg-k">Titik Koordinat (fiktif)</div><div class="dlg-v" id="dlgCoord"></div></div>
+
+    <div class="dlg-foot">Titik lokasi ditempatkan secara acak di sekitar wilayah Tegal untuk kebutuhan visualisasi dan tidak merepresentasikan lokasi kejadian sebenarnya.</div>
+  </div>
+</div>
+
+<script>
+// ---- data sumber (jumlah aduan = dummy, sesuai tabel yang diberikan) ----
+// tanggal & koordinat dibuat fiktif di sekitar wilayah Tegal (pusat kira-kira -6.90, 109.14)
+const cases = [
+  {
+    name: "PT Maju Jaya Bersama",
+    addr: "Jl. Raya Slawi–Pangkah, Desa Pangkah, Kecamatan Pangkah, Kabupaten Tegal",
+    count: 28,
+    status: "Dummy",
+    date: "12 Jan 2026",
+    lat: -6.945, lng: 109.101
+  },
+  {
+    name: "PT Maritim Sinar Berlian",
+    addr: "Jl. Teuku Cik Ditiro RT 003/RW 002, Dukuhrawa, Dukuhturi, Kabupaten Tegal",
+    count: 24,
+    status: "Dummy",
+    date: "03 Mar 2026",
+    lat: -6.887, lng: 109.176
+  },
+  {
+    name: "PT Darussalam Samudra Jaya",
+    addr: "Jl. Kenanga No.36, Desa Tegalwangi, Kecamatan Talang, Kabupaten Tegal",
+    count: 20,
+    status: "Dummy",
+    date: "21 Apr 2026",
+    lat: -6.958, lng: 109.203
+  },
+  {
+    name: "PT Teguh Wiratama Nusantara",
+    addr: "Jl. KH Husain RT 12/RW 04, Suradadi, Kabupaten Tegal",
+    count: 16,
+    status: "Dummy",
+    date: "09 Jun 2026",
+    lat: -6.793, lng: 109.135
+  },
+  {
+    name: "PT Bahari Kru Manajemen",
+    addr: "Jl. KH Yunus No.22, Bojongsana, Suradadi, Kabupaten Tegal",
+    count: 13,
+    status: "Dummy",
+    date: "27 Jun 2026",
+    lat: -6.812, lng: 109.088
+  },
+  {
+    name: "PT Mirana Nusantara Indonesia",
+    addr: "Jl. Sawo Barat No.59, Keraton, Tegal Barat, Kota Tegal",
+    count: 9,
+    status: "Dummy",
+    date: "14 Jul 2026",
+    lat: -6.869, lng: 109.129
+  }
+];
+
+function colorFor(count){
+  if (count > 22) return '#e0654a';
+  if (count >= 15) return '#e8b04b';
+  return '#3fa796';
+}
+function sizeFor(count){
+  return 26 + Math.round((count/28) * 20); // 26–46px
+}
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      osm: {
+        type: 'raster',
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        attribution: '© OpenStreetMap contributors'
+      }
+    },
+    layers: [
+      { id:'bg', type:'background', paint:{ 'background-color':'#0c1c2b' } },
+      { id:'osm', type:'raster', source:'osm', paint:{ 'raster-opacity':0.55, 'raster-saturation':-0.3 } }
+    ]
+  },
+  center: [109.14, -6.90],
+  zoom: 10.8,
+  attributionControl: { compact:true }
+});
+map.addControl(new maplibregl.NavigationControl({ showCompass:false }), 'top-right');
+
+const overlay = document.getElementById('overlay');
+function openDialog(c){
+  document.getElementById('dlgTitle').textContent = c.name;
+  document.getElementById('dlgDate').textContent = 'Tanggal simulasi: ' + c.date;
+  document.getElementById('dlgAddr').textContent = c.addr;
+  document.getElementById('dlgCount').textContent = c.count;
+  document.getElementById('dlgStatus').textContent = c.status;
+  document.getElementById('dlgCoord').textContent = c.lat.toFixed(3) + ', ' + c.lng.toFixed(3);
+  overlay.classList.add('show');
+
+  document.querySelectorAll('.tl-node').forEach(n=>n.classList.remove('active'));
+  const node = document.querySelector(`.tl-node[data-name="${c.name}"]`);
+  if (node) node.classList.add('active');
+}
+document.getElementById('dlgClose').addEventListener('click', ()=> overlay.classList.remove('show'));
+overlay.addEventListener('click', (e)=>{ if (e.target === overlay) overlay.classList.remove('show'); });
+
+map.on('load', ()=>{
+  cases.forEach(c=>{
+    const size = sizeFor(c.count);
+    const color = colorFor(c.count);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'mk';
+    wrap.style.width = size+'px';
+    wrap.style.height = size+'px';
+    wrap.style.position = 'relative';
+    wrap.innerHTML = `
+      <div class="mk-pulse" style="background:${color}"></div>
+      <div class="mk-core" style="width:${size}px;height:${size}px;background:${color};font-size:${size>36?13:11}px;">${c.count}</div>
+    `;
+    wrap.addEventListener('click', ()=> openDialog(c));
+
+    new maplibregl.Marker({ element: wrap, anchor:'center' })
+      .setLngLat([c.lng, c.lat])
+      .addTo(map);
+  });
+});
+
+// timeline strip
+const tlWrap = document.getElementById('timeline');
+cases.slice().sort((a,b)=> new Date(a.date) - new Date(b.date)).forEach(c=>{
+  const node = document.createElement('div');
+  node.className = 'tl-node';
+  node.dataset.name = c.name;
+  node.innerHTML = `
+    <div class="tl-dot" style="background:${colorFor(c.count)}"></div>
+    <div class="tl-date">${c.date}</div>
+    <div class="tl-name">${c.name}</div>
+    <div class="tl-count">${c.count} aduan (dummy)</div>
+  `;
+  node.addEventListener('click', ()=>{
+    map.flyTo({ center:[c.lng, c.lat], zoom:10.5, duration:900 });
+    openDialog(c);
+  });
+  tlWrap.appendChild(node);
+});
+</script>
+
+</body>
+</html>
