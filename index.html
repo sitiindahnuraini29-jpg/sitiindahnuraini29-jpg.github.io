@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peta Sebaran PT Penempatan Loker AKP Migran (Taiwan/Cina) - Kabupaten/Kota Tegal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/3.6.2/maplibre-gl.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/3.6.2/maplibre-gl.css" rel="stylesheet" />
+<style>
+  :root{
+    --red:#e74c3c;
+    --yellow:#f1c40f;
+    --green:#2ecc71;
+    --dark:#1f2937;
+    --muted:#6b7280;
+    --card:#ffffff;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Segoe UI', Roboto, Arial, sans-serif; background:#0f172a; }
+  #map{ position:absolute; top:0; bottom:0; width:100%; }
+
+  #header{
+    position:absolute; top:0; left:0; right:0; z-index:5;
+    padding:14px 18px;
+    background:linear-gradient(180deg, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.0) 100%);
+    color:#fff;
+    pointer-events:none;
+  }
+  #header h1{ margin:0; font-size:17px; font-weight:700; letter-spacing:.2px; }
+  #header p{ margin:4px 0 0; font-size:12.5px; color:#cbd5e1; }
+
+  #legend{
+    position:absolute; right:14px; bottom:24px; z-index:5;
+    background:var(--card); border-radius:12px; padding:14px 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+    width:230px; font-size:13px; color:var(--dark);
+  }
+  #legend h3{ margin:0 0 10px; font-size:13px; font-weight:700; }
+  .legend-row{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .legend-row:last-child{ margin-bottom:0; }
+  .dot{ width:16px; height:16px; border-radius:50%; flex:0 0 auto; border:2px solid rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(0,0,0,.15); }
+  .legend-sub{ color:var(--muted); font-size:11px; margin-top:2px; }
+  .legend-note{ margin-top:10px; padding-top:10px; border-top:1px solid #eee; color:var(--muted); font-size:11px; line-height:1.4; }
+
+  #panel-toggle-hint{
+    position:absolute; left:14px; bottom:24px; z-index:5;
+    background:rgba(15,23,42,.75); color:#fff; padding:8px 12px;
+    border-radius:20px; font-size:12px; display:flex; align-items:center; gap:8px;
+  }
+  #panel-toggle-hint .pulse{
+    width:9px;height:9px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 0 rgba(231,76,60,.6); animation:pulse 1.8s infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(231,76,60,.55);}
+    70%{ box-shadow:0 0 0 10px rgba(231,76,60,0);}
+    100%{ box-shadow:0 0 0 0 rgba(231,76,60,0);}
+  }
+
+  .maplibregl-popup-content{ display:none; } /* we use our own dialog, not the default popup box */
+
+  /* ---- Dialog box ---- */
+  #overlay{
+    position:fixed; inset:0; background:rgba(15,23,42,.55);
+    display:none; align-items:center; justify-content:center;
+    z-index:20; padding:16px;
+  }
+  #overlay.show{ display:flex; }
+  #dialog{
+    background:#fff; border-radius:16px; width:100%; max-width:420px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+    overflow:hidden;
+    transform:translateY(14px); opacity:0;
+    animation:dialogIn .18s ease-out forwards;
+  }
+  @keyframes dialogIn{ to{ transform:translateY(0); opacity:1; } }
+  #dialog-head{
+    padding:18px 20px 16px;
+    color:#fff;
+    position:relative;
+  }
+  #dialog-head .badge{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.3px;
+    background:rgba(255,255,255,.22); padding:3px 10px; border-radius:20px; margin-bottom:8px;
+    text-transform:uppercase;
+  }
+  #dialog-head h2{ margin:0; font-size:18px; line-height:1.3; font-weight:700; }
+  #dialog-close{
+    position:absolute; top:14px; right:14px; width:28px; height:28px; border-radius:50%;
+    background:rgba(255,255,255,.25); border:none; color:#fff; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #dialog-close:hover{ background:rgba(255,255,255,.4); }
+
+  #dialog-body{ padding:18px 20px 20px; }
+  .count-box{
+    display:flex; align-items:baseline; gap:8px; margin-bottom:14px;
+  }
+  .count-box .num{ font-size:36px; font-weight:800; color:var(--dark); }
+  .count-box .lbl{ font-size:13px; color:var(--muted); }
+
+  .bar-track{ height:8px; border-radius:6px; background:#eef0f3; overflow:hidden; margin-bottom:16px; }
+  .bar-fill{ height:100%; border-radius:6px; }
+
+  .info-row{ display:flex; gap:10px; padding:9px 0; border-top:1px solid #f1f1f4; font-size:13.5px; }
+  .info-row:first-of-type{ border-top:none; }
+  .info-row .ic{ width:20px; flex:0 0 auto; text-align:center; opacity:.75; }
+  .info-row .k{ color:var(--muted); min-width:88px; flex:0 0 auto; }
+  .info-row .v{ color:var(--dark); font-weight:500; word-break:break-word; }
+  .info-row .v a{ color:#2563eb; text-decoration:none; }
+  .info-row .v a:hover{ text-decoration:underline; }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .chip{ background:#f1f5f9; color:#334155; font-size:11.5px; padding:3px 9px; border-radius:20px; }
+
+  #dialog-foot{
+    padding:12px 20px 18px; font-size:11.5px; color:var(--muted); border-top:1px solid #f1f1f4;
+  }
+
+  .maplibregl-ctrl-top-right{ margin-top:70px; }
+  @media (max-width:520px){
+    #legend{ width:170px; padding:10px 12px; font-size:12px; }
+    #header h1{ font-size:15px; }
+    #header p{ font-size:11.5px; }
+    #panel-toggle-hint{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="header">
+  <h1>Sebaran PT Penempatan Loker AKP Migran ke Taiwan / Cina</h1>
+  <p>Kabupaten &amp; Kota Tegal &middot; berdasarkan metadata postingan media sosial</p>
+</div>
+
+<div id="panel-toggle-hint"><span class="pulse"></span> Klik titik pada peta untuk lihat detail postingan</div>
+
+<div id="legend">
+  <h3>Jumlah Postingan Loker</h3>
+  <div class="legend-row"><span class="dot" style="background:var(--red)"></span> Banyak (&ge; 8 postingan)</div>
+  <div class="legend-row"><span class="dot" style="background:var(--yellow)"></span> Sedang (3&ndash;7 postingan)</div>
+  <div class="legend-row"><span class="dot" style="background:var(--green)"></span> Sedikit (1&ndash;2 postingan)</div>
+  <div class="legend-note">Ukuran titik juga mengikuti jumlah postingan tiap PT. Koordinat mengikuti alamat PT (level desa/kecamatan) yang tercantum pada data.</div>
+</div>
+
+<!-- Dialog box -->
+<div id="overlay">
+  <div id="dialog" role="dialog" aria-modal="true">
+    <div id="dialog-head">
+      <button id="dialog-close" aria-label="Tutup">&times;</button>
+      <span class="badge" id="dg-badge">PT</span>
+      <h2 id="dg-name">Nama PT</h2>
+    </div>
+    <div id="dialog-body">
+      <div class="count-box">
+        <span class="num" id="dg-count">0</span>
+        <span class="lbl">postingan loker ditemukan</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="dg-bar"></div></div>
+
+      <div class="info-row">
+        <span class="ic">&#128205;</span>
+        <span class="k">Alamat</span>
+        <span class="v" id="dg-address">-</span>
+      </div>
+      <div class="info-row">
+        <span class="ic">&#127760;</span>
+        <span class="k">Negara tujuan</span>
+        <span class="v" id="dg-negara">-</span>
+      </div>
+      <div class="info-row">
+        <span class="ic">&#128222;</span>
+        <span class="k">Kontak</span>
+        <span class="v" id="dg-hp">-</span>
+      </div>
+      <div class="info-row">
+        <span class="ic">&#128279;</span>
+        <span class="k">Website</span>
+        <span class="v" id="dg-web">-</span>
+      </div>
+      <div class="info-row">
+        <span class="ic">&#128100;</span>
+        <span class="k">Akun poster</span>
+        <span class="v"><div class="chips" id="dg-akun"></div></span>
+      </div>
+    </div>
+    <div id="dialog-foot" id="dg-foot">Sumber: Metadata_Loker_AKP_Migran_Taiwan_Cina_di_Tegal.xlsx</div>
+  </div>
+</div>
+
+<script>
+// ============ DATA (direkap dari sheet "Datasheet Postingan") ============
+// Koordinat mengikuti alamat/desa PT yang tercantum pada data (level desa/kecamatan).
+const companies = [
+  {
+    id: 'samudra',
+    name: 'PT Samudra Ina Pertiwi',
+    address: 'Jln. Amongdwijo/Amongdjiwo, Desa Pangkah, Kec. Pangkah, Kab. Tegal, Jawa Tengah',
+    lat: -6.9740, lng: 109.1690,
+    count: 12,
+    negara: ['China', 'Taiwan'],
+    hp: '083187107979 (Ade, staf kantor)',
+    website: 'https://ptsamudrainapertiwi.com/',
+    akun: ['Rizal Fahriza', 'Khairul Fahmi']
+  },
+  {
+    id: 'indotak_main',
+    name: 'PT Indotak Jaya Abadi',
+    address: 'Jl. Pantura Larangan RT 001 RW 002, Kec. Kramat, Kab. Tegal (kantor pusat); juga cabang di Jl. Garuda, Larangan, Munjung Agung, Kec. Kramat',
+    lat: -6.8500, lng: 109.1920,
+    count: 12,
+    negara: ['Taiwan'],
+    hp: '0895321635824 (Mas Feri) / 082246652015 / 0822466520015',
+    website: null,
+    akun: ['Juniarto Loker ABK', 'Tobiin kanyut']
+  },
+  {
+    id: 'majujaya',
+    name: 'PT Maju Jaya Bersama',
+    address: 'Jln. Raya Karanganyar, Ds. Karanganyar, Kec. Kedungbanteng, Kab. Tegal, Jawa Tengah',
+    lat: -6.9750, lng: 109.2164,
+    count: 5,
+    negara: ['China', 'Taiwan'],
+    hp: '089670023573 / 0857-2961-1250',
+    website: 'https://www.mjbtegal.com/',
+    akun: ['M Arif', 'Wulandari Mjb']
+  },
+  {
+    id: 'rnt',
+    name: 'PT RNT Utama',
+    address: 'Jl. Nanas No.3 RT 005/002, Kel. Procot, Kec. Slawi, Kab. Tegal',
+    lat: -6.9819, lng: 109.1417,
+    count: 4,
+    negara: ['China'],
+    hp: '089653197548 / 082260077724 / 085285349957 (poster)',
+    website: 'https://rntui.com/',
+    akun: ['Wan Sabana', 'Marimo Zoro Rorona', 'Chan Loli']
+  },
+  {
+    id: 'restu',
+    name: 'PT Restu Karya Bersama',
+    address: 'Jl. Raya Kalikangkung Banjaran No.89, Kalikangkung, Kec. Pangkah, Kab. Tegal',
+    lat: -6.9740, lng: 109.1400,
+    count: 2,
+    negara: [],
+    hp: '085651301335 / 085771012557 / 08984290350',
+    website: 'https://www.restukaryabersama.co.id/',
+    akun: ['Aul Rad', 'Aditya Axl']
+  },
+  {
+    id: 'maritim',
+    name: 'PT Maritim Sinar Berlian',
+    address: 'Jl. Raya Utara Adiwerna No.46, Pejagan, Tembok Banjaran, Kec. Adiwerna, Kab. Tegal',
+    lat: -6.9120, lng: 109.1280,
+    count: 1,
+    negara: ['China'],
+    hp: '085865002228',
+    website: null,
+    akun: ['S Maritim Msb']
+  },
+  {
+    id: 'garuda',
+    name: 'PT. Garuda Insani Mandiri',
+    address: 'Jl. Sipelem, Ruko Citraland, Kel. Kraton, Kec. Tegal Barat, Kota Tegal',
+    lat: -6.8695, lng: 109.1180,
+    count: 1,
+    negara: ['Taiwan'],
+    hp: '085189758809',
+    website: null,
+    akun: ['Fauzan Shiddiq']
+  },
+];
+
+const maxCount = Math.max(...companies.map(c => c.count));
+
+function colorFor(count){
+  if (count >= 8) return '#e74c3c';   // merah - banyak
+  if (count >= 3) return '#f1c40f';   // kuning - sedang
+  return '#2ecc71';                    // hijau - sedikit
+}
+function levelLabel(count){
+  if (count >= 8) return 'Banyak';
+  if (count >= 3) return 'Sedang';
+  return 'Sedikit';
+}
+function radiusFor(count){
+  // 14px untuk terbanyak, minimal 8px
+  const min = 9, max = 22;
+  return min + (max - min) * (count / maxCount);
+}
+
+// ============ MAP ============
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      osm: {
+        type: 'raster',
+        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        attribution: '&copy; OpenStreetMap contributors'
+      }
+    },
+    layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+  },
+  center: [109.165, 6.940 * -1], // dummy, replaced below
+  zoom: 11
+});
+map.setCenter([109.165, -6.940]);
+
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+
+const overlay = document.getElementById('overlay');
+const dialog = document.getElementById('dialog');
+
+function openDialog(c){
+  const col = colorFor(c.count);
+  document.getElementById('dg-badge').textContent = levelLabel(c.count) + ' postingan';
+  document.getElementById('dg-badge').style.background = 'rgba(255,255,255,.28)';
+  document.getElementById('dialog-head').style.background = `linear-gradient(135deg, ${col}, ${shade(col,-18)})`;
+  document.getElementById('dg-name').textContent = c.name;
+  document.getElementById('dg-count').textContent = c.count;
+  document.getElementById('dg-count').style.color = col;
+  document.getElementById('dg-bar').style.width = Math.max(6, (c.count / maxCount) * 100) + '%';
+  document.getElementById('dg-bar').style.background = col;
+  document.getElementById('dg-address').textContent = c.address;
+  document.getElementById('dg-negara').textContent = c.negara.length ? c.negara.join(' / ') : 'Tidak disebutkan';
+  document.getElementById('dg-hp').textContent = c.hp || '-';
+
+  const webEl = document.getElementById('dg-web');
+  if (c.website){
+    webEl.innerHTML = `<a href="${c.website}" target="_blank" rel="noopener">${c.website.replace(/^https?:\/\//,'')}</a>`;
+  } else {
+    webEl.textContent = 'Tidak tercantum';
+  }
+
+  const akunWrap = document.getElementById('dg-akun');
+  akunWrap.innerHTML = '';
+  c.akun.forEach(a => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = a;
+    akunWrap.appendChild(chip);
+  });
+
+  overlay.classList.add('show');
+}
+function closeDialog(){ overlay.classList.remove('show'); }
+document.getElementById('dialog-close').addEventListener('click', closeDialog);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDialog(); });
+
+function shade(hex, percent){
+  const num = parseInt(hex.slice(1),16);
+  let r = (num>>16) + Math.round(2.55*percent);
+  let g = ((num>>8)&0x00FF) + Math.round(2.55*percent);
+  let b = (num&0x0000FF) + Math.round(2.55*percent);
+  r = Math.max(0,Math.min(255,r)); g = Math.max(0,Math.min(255,g)); b = Math.max(0,Math.min(255,b));
+  return '#' + (0x1000000 + r*0x10000 + g*0x100 + b).toString(16).slice(1);
+}
+
+map.on('load', () => {
+  companies.forEach(c => {
+    const el = document.createElement('div');
+    const r = radiusFor(c.count);
+    const col = colorFor(c.count);
+    el.style.width = (r*2)+'px';
+    el.style.height = (r*2)+'px';
+    el.style.borderRadius = '50%';
+    el.style.background = col;
+    el.style.border = '3px solid #fff';
+    el.style.boxShadow = '0 3px 10px rgba(0,0,0,.35)';
+    el.style.cursor = 'pointer';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.color = '#fff';
+    el.style.fontWeight = '800';
+    el.style.fontSize = Math.max(10, r*0.7) + 'px';
+    el.style.fontFamily = 'Segoe UI, Arial, sans-serif';
+    el.textContent = c.count;
+    el.title = c.name + ' - ' + c.count + ' postingan';
+
+    el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.12)'; el.style.transition='transform .15s'; });
+    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+    el.addEventListener('click', () => openDialog(c));
+
+    new maplibregl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([c.lng, c.lat])
+      .addTo(map);
+  });
+
+  // Fit bounds ke semua titik
+  const bounds = new maplibregl.LngLatBounds();
+  companies.forEach(c => bounds.extend([c.lng, c.lat]));
+  map.fitBounds(bounds, { padding: 80, maxZoom: 13 });
+});
+</script>
+
+</body>
+</html>
