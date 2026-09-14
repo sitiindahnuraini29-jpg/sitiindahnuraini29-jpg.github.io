@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Pergeseran Demografi Pilihan Kerja Pemuda Desa</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            max-width: 750px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            font-size: 22px;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        p.subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 350px;
+            width: 100%;
+            max-width: 450px;
+        }
+        .info-box {
+            margin-top: 25px;
+            text-align: left;
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-left: 4px solid #0284c7;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="container">
+        <h1>Pergeseran Demografi Pilihan Kerja Pemuda Desa</h1>
+        <p class="subtitle">Dampak trauma kecelakaan laut dan risiko tinggi terhadap orientasi angkatan kerja muda di Tegal</p>
+        
+        <div class="chart-container">
+            <canvas id="demographicChart"></canvas>
+        </div>
+
+        <div class="info-box">
+            <strong>Catatan Investigasi:</strong> Terjadi penurunan drastis minat bekerja di sektor kelautan/kapal asing (tersisa 5% - 10%) akibat tingginya angka kecelakaan kerja fatal dan insiden pelarungan jenazah. Sebaliknya, sekitar 25% angkatan kerja muda desa beralih membidik sektor manufaktur dan perkebunan di luar negeri (seperti Jepang dan Selandia Baru) karena nilai kurs yang lebih tinggi dengan risiko fisik yang lebih terukur.
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('demographicChart').getContext('2d');
+        const demographicChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Sektor Darat / Luar Negeri (Jepang, Selandia Baru) [25%]', 
+                    'Sektor Kelautan / Kapal Asing (Tersisa) [7.5%]', 
+                    'Sektor Lainnya / Belum Menentukan / Lokal [67.5%]'
+                ],
+                datasets: [{
+                    label: 'Persentase Pilihan Kerja',
+                    data: [25, 7.5, 67.5],
+                    backgroundColor: [
+                        '#0284c7', // Biru profesional untuk sektor darat/luar negeri
+                        '#e11d48', // Merah peringatan untuk sisa minat laut
+                        '#cbd5e1'  // Abu-abu netral untuk sektor lainnya
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 14,
+                            font: {
+                                size: 12,
+                                family: "'Segoe UI', sans-serif"
+                            },
+                            color: '#334155',
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.parsed;
+                                return ` ${label.split('[')[0].trim()}: ${value}%`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
