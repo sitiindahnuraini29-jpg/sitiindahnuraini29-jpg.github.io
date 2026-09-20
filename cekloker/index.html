@@ -1,1 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriks Verifikasi Loker AKP: Resmi vs Ilegal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold tracking-wide uppercase mb-3">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i> Alat Cek Mandiri Calon AKP
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                Anatomi & Perbandingan Jalur Penempatan AKP
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
+                Berdasarkan temuan 37 lowongan berulang di media sosial (13 akun unik) dan aturan hukum penempatan Awak Kapal Perikanan (China/Taiwan) di Tegal.
+            </p>
+        </div>
 
+        <!-- Interactive Checklist Filter / Progress -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <i data-lucide="check-square" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900">Simulasi Validasi Mandiri</h3>
+                    <p class="text-xs text-slate-500">Centang indikator yang Anda temukan pada tawaran kerja:</p>
+                </div>
+            </div>
+            <div id="riskScore" class="px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                <span>Status Penawaran: <strong id="riskLabel">Aman / Periksa Ulang</strong></span>
+            </div>
+        </div>
+
+        <!-- Comparison Matrix Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-600">
+                            <th class="py-4 px-4 sm:px-6 font-semibold w-1/4">Parameter / Titik Kritis</th>
+                            <th class="py-4 px-4 sm:px-6 font-semibold w-5/12 text-blue-900 bg-blue-50/50 border-x border-blue-100">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-blue-600"></i> Jalur Resmi (P3MI / SISCO 2MI)
+                                </div>
+                            </th>
+                            <th class="py-4 px-4 sm:px-6 font-semibold w-5/12 text-red-900 bg-red-50/50">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i> Jebakan Medsos & LPK Ilegal
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-sm">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-slate-900">Dasar Sistem & Sumber</td>
+                            <td class="py-4 px-4 sm:px-6 bg-blue-50/20 border-x border-blue-100 text-slate-700">
+                                Terdaftar di sistem <strong>SISCO 2MI</strong> (KP2MI/BP3MI). Kantor fisik jelas.
+                            </td>
+                            <td class="py-4 px-4 sm:px-6 bg-red-50/20 text-slate-700">
+                                Postingan akun FB pribadi/anonim (37 temuan dari 13 akun unik di Tegal).
+                                <label class="mt-2 flex items-center gap-2 text-xs text-red-700 cursor-pointer select-none">
+                                    <input type="checkbox" class="risk-check rounded border-red-300 text-red-600 focus:ring-red-500">
+                                    <span>Tanda bahaya: Lowongan via akun medsos tanpa PT jelas</span>
+                                </label>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-slate-900">Legalitas / Pencatutan PT</td>
+                            <td class="py-4 px-4 sm:px-6 bg-blue-50/20 border-x border-blue-100 text-slate-700">
+                                Menggunakan PT berizin resmi yang terverifikasi penempatan laut.
+                            </td>
+                            <td class="py-4 px-4 sm:px-6 bg-red-50/20 text-slate-700">
+                                Pencatutan nama PT (hanya sebagian kecil terdaftar lokal, mayoritas fiktif/tidak terverifikasi).
+                                <label class="mt-2 flex items-center gap-2 text-xs text-red-700 cursor-pointer select-none">
+                                    <input type="checkbox" class="risk-check rounded border-red-300 text-red-600 focus:ring-red-500">
+                                    <span>Tanda bahaya: PT pencatutan / tidak terverifikasi Disnaker lokal</span>
+                                </label>
+                            </td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-slate-900">Waktu Pemberangkatan</td>
+                            <td class="py-4 px-4 sm:px-6 bg-blue-50/20 border-x border-blue-100 text-slate-700">
+                                <strong>Maks. 3 bulan</strong> setelah penandatanganan Perjanjian disaksikan Disnaker.
+                            </td>
+                            <td class="py-4 px-4 sm:px-6 bg-red-50/20 text-slate-700">
+                                Dijanjikan instan / <strong>"dalam hitungan hari"</strong>.
+                                <label class="mt-2 flex items-center gap-2 text-xs text-red-700 cursor-pointer select-none">
+                                    <input type="checkbox" class="risk-check rounded border-red-300 text-red-600 focus:ring-red-500">
+                                    <span>Tanda bahaya: Janji berangkat kilat &lt; 1 minggu</span>
+                                </label>
+                            </td>
+                        </tr>
+                        <!-- Row 4 -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-slate-900">Skema Biaya</td>
+                            <td class="py-4 px-4 sm:px-6 bg-blue-50/20 border-x border-blue-100 text-slate-700">
+                                Transparan, terstruktur sesuai regulasi penempatan resmi.
+                            </td>
+                            <td class="py-4 px-4 sm:px-6 bg-red-50/20 text-slate-700">
+                                Klaim <strong>"Free / Dana Talangan"</strong> berujung utang dan potong gaji 1 tahun tanpa sisa.
+                                <label class="mt-2 flex items-center gap-2 text-xs text-red-700 cursor-pointer select-none">
+                                    <input type="checkbox" class="risk-check rounded border-red-300 text-red-600 focus:ring-red-500">
+                                    <span>Tanda bahaya: Gratis di awal, bayar via potong gaji 1 tahun penuh</span>
+                                </label>
+                            </td>
+                        </tr>
+                        <!-- Row 5 -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-slate-900">Kewenangan LPK vs P3MI</td>
+                            <td class="py-4 px-4 sm:px-6 bg-blue-50/20 border-x border-blue-100 text-slate-700">
+                                <strong>LPK</strong> hanya melatih skill. Penyaluran kerja wajib oleh <strong>P3MI resmi</strong>.
+                            </td>
+                            <td class="py-4 px-4 sm:px-6 bg-red-50/20 text-slate-700">
+                                LPK/Sponsor menawarkan penempatan kerja langsung (melanggar aturan).
+                                <label class="mt-2 flex items-center gap-2 text-xs text-red-700 cursor-pointer select-none">
+                                    <input type="checkbox" class="risk-check rounded border-red-300 text-red-600 focus:ring-red-500">
+                                    <span>Tanda bahaya: LPK menjanjikan penempatan kerja langsung</span>
+                                </label>
+                            </td>
+                        </tr>
+                        <!-- Row 6 -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-slate-900">Dokumen & Visa Kerja</td>
+                            <td class="py-4 px-4 sm:px-6 bg-blue-50/20 border-x border-blue-100 text-slate-700">
+                                Dokumen pelaut lengkap + <strong>Visa Kerja Sektor Laut (SIUKAK)</strong>.
+                            </td>
+                            <td class="py-4 px-4 sm:px-6 bg-red-50/20 text-slate-700">
+                                Berisiko menggunakan <strong>visa turis/wisata</strong> untuk bekerja di laut.
+                                <label class="mt-2 flex items-center gap-2 text-xs text-red-700 cursor-pointer select-none">
+                                    <input type="checkbox" class="risk-check rounded border-red-300 text-red-600 focus:ring-red-500">
+                                    <span>Tanda bahaya: Menggunakan visa turis/wisata</span>
+                                </label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Card / Footer Guidance & Download Button -->
+        <div class="bg-slate-900 text-slate-100 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h4 class="font-semibold text-base">Prinsip Emas Sebelum Klik / Bayar</h4>
+                <p class="text-xs text-slate-400 mt-1">Cek legalitas perusahaan (Owner &rarr; Agency &rarr; P3MI) dan simpan bukti tangkapan layar chat serta rekening pengirim.</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-2 border border-slate-700">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Cetak
+                </button>
+                <button id="downloadBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i> Unduh File HTML
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const checkboxes = document.querySelectorAll('.risk-check');
+        const riskLabel = document.getElementById('riskLabel');
+        const riskScoreBox = document.getElementById('riskScore');
+
+        checkboxes.forEach(chk => {
+            chk.addEventListener('change', () => {
+                let checkedCount = document.querySelectorAll('.risk-check:checked').length;
+                if (checkedCount === 0) {
+                    riskLabel.textContent = 'Aman / Periksa Ulang';
+                    riskScoreBox.className = 'px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2';
+                } else if (checkedCount <= 2) {
+                    riskLabel.textContent = 'Waspada Sedang (' + checkedCount + ' indikator)';
+                    riskScoreBox.className = 'px-4 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium flex items-center gap-2';
+                } else {
+                    riskLabel.textContent = 'INDIKASI KUAT NON-PROSEDURAL/ILEGAL (' + checkedCount + ' indikator)';
+                    riskScoreBox.className = 'px-4 py-2 rounded-lg bg-red-50 border border-red-200 text-red-800 font-bold text-xs flex items-center gap-2';
+                }
+            });
+        });
+
+        // Blob download handler
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([<!DOCTYPE html> + htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'matriks_verifikasi_loker_akp.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
